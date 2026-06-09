@@ -251,6 +251,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
       <span class="stat-pill">Dizi <b id="tp-dizi">0</b></span>
       <div class="user-pill" id="user-pill"></div>
       <button class="btn-add" onclick="openAddModal()">+ Ekle</button>
+      <button class="btn-signout" onclick="openThemePanel()" title="Tema seç" style="font-size:14px">🎨</button>
       <button class="btn-signout" onclick="doSignout()">Çıkış</button>
     </div>
   </div>
@@ -390,7 +391,40 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
   </div>
 </div>
 
-<div class="notif" id="notif"><div class="notif-dot"></div><span id="notif-text"></span></div>
+<!-- THEME PANEL -->
+<div class="modal-ov" id="theme-panel" style="display:none" onclick="if(event.target===this)closeThemePanel()">
+  <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-lg);width:520px;max-width:96vw;max-height:88vh;overflow-y:auto;padding:24px;box-shadow:0 24px 64px rgba(0,0,0,.5)" onclick="event.stopPropagation()">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div>
+        <div style="font-size:15px;font-weight:600;color:var(--text)">🎨 Tema Seç</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px">Japon manga & anime ilhamlı renkler</div>
+      </div>
+      <button onclick="closeThemePanel()" style="background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer">✕</button>
+    </div>
+    <div id="theme-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px"></div>
+    <div style="border-top:1px solid var(--border);padding-top:16px">
+      <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">Özel Renk</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:5px">Vurgu rengi</div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <input type="color" id="custom-accent" value="#f59e0b" oninput="applyCustomColor()" style="width:36px;height:28px;border:1px solid var(--border2);border-radius:4px;cursor:pointer;background:none;padding:1px">
+            <span id="custom-accent-val" style="font-size:11px;color:var(--text3);font-family:monospace">#f59e0b</span>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:5px">Arkaplan</div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <input type="color" id="custom-bg" value="#09090b" oninput="applyCustomColor()" style="width:36px;height:28px;border:1px solid var(--border2);border-radius:4px;cursor:pointer;background:none;padding:1px">
+            <span id="custom-bg-val" style="font-size:11px;color:var(--text3);font-family:monospace">#09090b</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="notif-dot"></div><span id="notif-text"></span></div>
 
 <script>
 const SUPA_URL='https://mabvegjovhqejdjolsaq.supabase.co';
@@ -887,6 +921,153 @@ function showTab(t){
   if(t==='rapor') renderRapor();
   if(t==='import') updateImpStatus();
 }
+
+// ===== TEMA SİSTEMİ =====
+const THEMES = [
+  {
+    id:'akira', name:'Akira', desc:'Neo-Tokyo karanlığı',
+    emoji:'🔴',
+    vars:{'--bg':'#0a0008','--bg2':'#130010','--bg3':'#1e0018','--bg4':'#2e0028','--bg5':'#420038',
+          '--text':'#ff6ef7','--text2':'#c44ab8','--text3':'#7a2e6e',
+          '--gold':'#ff003c','--gold2':'#ff6699','--gold3':'#7a001c','--gold-dim':'rgba(255,0,60,.15)',
+          '--cyan':'#ff6ef7','--border':'#2e0028','--border2':'#420038'}
+  },
+  {
+    id:'naruto', name:'Naruto', desc:'Konoha ormanı & chakra',
+    emoji:'🟠',
+    vars:{'--bg':'#0d0800','--bg2':'#180e00','--bg3':'#221500','--bg4':'#332000','--bg5':'#4a2e00',
+          '--text':'#ffd580','--text2':'#c8960a','--text3':'#7a5a00',
+          '--gold':'#ff6600','--gold2':'#ffa040','--gold3':'#7a3000','--gold-dim':'rgba(255,102,0,.15)',
+          '--cyan':'#4af0c0','--border':'#332000','--border2':'#4a2e00'}
+  },
+  {
+    id:'bleach', name:'Bleach', desc:'Soul Society beyazı & siyahı',
+    emoji:'⚫',
+    vars:{'--bg':'#000000','--bg2':'#0a0a0a','--bg3':'#141414','--bg4':'#242424','--bg5':'#383838',
+          '--text':'#ffffff','--text2':'#c0c0c0','--text3':'#606060',
+          '--gold':'#c8a000','--gold2':'#ffd700','--gold3':'#604800','--gold-dim':'rgba(200,160,0,.15)',
+          '--cyan':'#e8e8e8','--border':'#242424','--border2':'#383838'}
+  },
+  {
+    id:'evangelion', name:'Evangelion', desc:'NERV taktik ekranı',
+    emoji:'🟢',
+    vars:{'--bg':'#000800','--bg2':'#001200','--bg3':'#001c00','--bg4':'#002800','--bg5':'#003800',
+          '--text':'#00ff41','--text2':'#00c830','--text3':'#007820',
+          '--gold':'#00ff41','--gold2':'#80ff90','--gold3':'#007820','--gold-dim':'rgba(0,255,65,.12)',
+          '--cyan':'#ffb800','--border':'#002800','--border2':'#003800'}
+  },
+  {
+    id:'spirited', name:'Sen to Chihiro', desc:'Bathhouse sakinliği',
+    emoji:'🔵',
+    vars:{'--bg':'#020810','--bg2':'#041020','--bg3':'#071830','--bg4':'#0c2448','--bg5':'#143460',
+          '--text':'#a8d8f0','--text2':'#6aabcc','--text3':'#3a6880',
+          '--gold':'#f0b040','--gold2':'#ffd080','--gold3':'#805800','--gold-dim':'rgba(240,176,64,.15)',
+          '--cyan':'#40c8f0','--border':'#0c2448','--border2':'#143460'}
+  },
+  {
+    id:'berserk', name:'Berserk', desc:'Eclipse karanlığı',
+    emoji:'🟤',
+    vars:{'--bg':'#080400','--bg2':'#120800','--bg3':'#1c0e00','--bg4':'#2c1800','--bg5':'#402400',
+          '--text':'#e8c890','--text2':'#b89050','--text3':'#705820',
+          '--gold':'#c84000','--gold2':'#ff7040','--gold3':'#602000','--gold-dim':'rgba(200,64,0,.15)',
+          '--cyan':'#e8c890','--border':'#2c1800','--border2':'#402400'}
+  },
+  {
+    id:'cyberpunk', name:'Ghost in the Shell', desc:'Siber beyin dalgaları',
+    emoji:'🟣',
+    vars:{'--bg':'#020008','--bg2':'#060010','--bg3':'#0c0020','--bg4':'#160038','--bg5':'#200050',
+          '--text':'#c080ff','--text2':'#8040cc','--text3':'#502080',
+          '--gold':'#00d4ff','--gold2':'#80ecff','--gold3':'#006880','--gold-dim':'rgba(0,212,255,.15)',
+          '--cyan':'#ff40c0','--border':'#160038','--border2':'#200050'}
+  },
+  {
+    id:'sakura', name:'Sakura', desc:'Pembe kiraz çiçekleri',
+    emoji:'🌸',
+    vars:{'--bg':'#08000a','--bg2':'#120014','--bg3':'#1c0020','--bg4':'#2c0034','--bg5':'#3c0048',
+          '--text':'#ffaad4','--text2':'#cc6699','--text3':'#883366',
+          '--gold':'#ff6699','--gold2':'#ffaacc','--gold3':'#882244','--gold-dim':'rgba(255,102,153,.15)',
+          '--cyan':'#aa88ff','--border':'#2c0034','--border2':'#3c0048'}
+  }
+];
+
+function hexToRgb(hex){
+  const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  return {r,g,b};
+}
+function lighten(hex,pct){
+  const{r,g,b}=hexToRgb(hex);
+  const f=pct/100;
+  return '#'+[r,g,b].map(c=>Math.min(255,Math.round(c+(255-c)*f)).toString(16).padStart(2,'0')).join('');
+}
+function darken(hex,pct){
+  const{r,g,b}=hexToRgb(hex);
+  const f=1-pct/100;
+  return '#'+[r,g,b].map(c=>Math.max(0,Math.round(c*f)).toString(16).padStart(2,'0')).join('');
+}
+
+function applyTheme(vars){
+  const root=document.documentElement;
+  Object.entries(vars).forEach(([k,v])=>root.style.setProperty(k,v));
+  localStorage.setItem('sa_theme',JSON.stringify(vars));
+}
+
+function loadSavedTheme(){
+  const saved=localStorage.getItem('sa_theme');
+  if(saved){try{applyTheme(JSON.parse(saved));}catch(e){}}
+}
+
+function openThemePanel(){
+  buildThemeGrid();
+  document.getElementById('theme-panel').style.display='';
+}
+function closeThemePanel(){
+  document.getElementById('theme-panel').style.display='none';
+}
+
+function buildThemeGrid(){
+  const grid=document.getElementById('theme-grid');
+  const currentVars=JSON.stringify(Object.fromEntries(
+    THEMES[0] ? Object.keys(THEMES[0].vars).map(k=>[k,getComputedStyle(document.documentElement).getPropertyValue(k).trim()]) : []
+  ));
+  grid.innerHTML=THEMES.map(t=>`
+    <div onclick="applyTheme(${JSON.stringify(t.vars).replace(/"/g,"'")})" style="
+      cursor:pointer;border-radius:8px;overflow:hidden;border:1px solid ${t.vars['--border2']};
+      background:${t.vars['--bg2']};transition:transform .15s;
+    " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+      <div style="height:56px;background:linear-gradient(135deg,${t.vars['--bg']},${t.vars['--bg4']});position:relative;display:flex;align-items:center;justify-content:center">
+        <div style="font-size:24px">${t.emoji}</div>
+        <div style="position:absolute;bottom:6px;right:8px;display:flex;gap:4px">
+          <div style="width:12px;height:12px;border-radius:50%;background:${t.vars['--gold']}"></div>
+          <div style="width:12px;height:12px;border-radius:50%;background:${t.vars['--cyan']}"></div>
+          <div style="width:12px;height:12px;border-radius:50%;background:${t.vars['--text']}"></div>
+        </div>
+      </div>
+      <div style="padding:8px 10px">
+        <div style="font-size:12px;font-weight:600;color:${t.vars['--text']}">${t.name}</div>
+        <div style="font-size:10px;color:${t.vars['--text3']};margin-top:2px">${t.desc}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function applyCustomColor(){
+  const accent=document.getElementById('custom-accent').value;
+  const bg=document.getElementById('custom-bg').value;
+  document.getElementById('custom-accent-val').textContent=accent;
+  document.getElementById('custom-bg-val').textContent=bg;
+  const vars={
+    '--bg':bg,
+    '--bg2':lighten(bg,4),'--bg3':lighten(bg,8),'--bg4':lighten(bg,14),'--bg5':lighten(bg,22),
+    '--text':'#fafafa','--text2':'#a1a1aa','--text3':'#52525b',
+    '--gold':accent,'--gold2':lighten(accent,25),'--gold3':darken(accent,40),
+    '--gold-dim':`rgba(${Object.values(hexToRgb(accent)).join(',')}, .15)`,
+    '--cyan':lighten(accent,20),
+    '--border':lighten(bg,14),'--border2':lighten(bg,22)
+  };
+  applyTheme(vars);
+}
+
+loadSavedTheme();
 
 init();
 
