@@ -404,22 +404,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
     <div id="theme-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px"></div>
     <div style="border-top:1px solid var(--border);padding-top:16px">
       <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">Özel Renk</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
         <div>
           <div style="font-size:11px;color:var(--text3);margin-bottom:5px">Vurgu rengi</div>
           <div style="display:flex;align-items:center;gap:8px">
-            <input type="color" id="custom-accent" value="#f59e0b" oninput="applyCustomColor()" style="width:36px;height:28px;border:1px solid var(--border2);border-radius:4px;cursor:pointer;background:none;padding:1px">
+            <input type="color" id="custom-accent" value="#f59e0b" oninput="previewCustomColor()" style="width:36px;height:28px;border:1px solid var(--border2);border-radius:4px;cursor:pointer;background:none;padding:1px">
             <span id="custom-accent-val" style="font-size:11px;color:var(--text3);font-family:monospace">#f59e0b</span>
           </div>
         </div>
         <div>
           <div style="font-size:11px;color:var(--text3);margin-bottom:5px">Arkaplan</div>
           <div style="display:flex;align-items:center;gap:8px">
-            <input type="color" id="custom-bg" value="#09090b" oninput="applyCustomColor()" style="width:36px;height:28px;border:1px solid var(--border2);border-radius:4px;cursor:pointer;background:none;padding:1px">
+            <input type="color" id="custom-bg" value="#09090b" oninput="previewCustomColor()" style="width:36px;height:28px;border:1px solid var(--border2);border-radius:4px;cursor:pointer;background:none;padding:1px">
             <span id="custom-bg-val" style="font-size:11px;color:var(--text3);font-family:monospace">#09090b</span>
           </div>
         </div>
       </div>
+      <button onclick="applyCustomColor()" style="width:100%;padding:8px;border-radius:var(--radius);border:none;background:var(--gold);color:#000;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">Özel Rengi Uygula</button>
     </div>
   </div>
 </div>
@@ -1009,6 +1010,10 @@ function applyTheme(vars){
   const root=document.documentElement;
   Object.entries(vars).forEach(([k,v])=>root.style.setProperty(k,v));
   localStorage.setItem('sa_theme',JSON.stringify(vars));
+  notify('Tema uygulandı ✓');
+  // Highlight selected card
+  document.querySelectorAll('#theme-grid > div').forEach(el=>el.style.outline='none');
+  setTimeout(()=>closeThemePanel(),600);
 }
 
 function loadSavedTheme(){
@@ -1031,9 +1036,10 @@ function buildThemeGrid(){
   ));
   grid.innerHTML=THEMES.map(t=>`
     <div onclick="applyTheme(${JSON.stringify(t.vars).replace(/"/g,"'")})" style="
-      cursor:pointer;border-radius:8px;overflow:hidden;border:1px solid ${t.vars['--border2']};
-      background:${t.vars['--bg2']};transition:transform .15s;
-    " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+      cursor:pointer;border-radius:8px;overflow:hidden;border:2px solid ${t.vars['--border2']};
+      background:${t.vars['--bg2']};transition:all .15s;position:relative;
+    " onmouseover="this.style.borderColor='${t.vars['--gold']}';this.style.transform='translateY(-2px)'" 
+       onmouseout="this.style.borderColor='${t.vars['--border2']}';this.style.transform=''">
       <div style="height:56px;background:linear-gradient(135deg,${t.vars['--bg']},${t.vars['--bg4']});position:relative;display:flex;align-items:center;justify-content:center">
         <div style="font-size:24px">${t.emoji}</div>
         <div style="position:absolute;bottom:6px;right:8px;display:flex;gap:4px">
@@ -1042,19 +1048,27 @@ function buildThemeGrid(){
           <div style="width:12px;height:12px;border-radius:50%;background:${t.vars['--text']}"></div>
         </div>
       </div>
-      <div style="padding:8px 10px">
-        <div style="font-size:12px;font-weight:600;color:${t.vars['--text']}">${t.name}</div>
-        <div style="font-size:10px;color:${t.vars['--text3']};margin-top:2px">${t.desc}</div>
+      <div style="padding:8px 10px;display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-size:12px;font-weight:600;color:${t.vars['--text']}">${t.name}</div>
+          <div style="font-size:10px;color:${t.vars['--text3']};margin-top:2px">${t.desc}</div>
+        </div>
+        <div style="font-size:10px;font-weight:600;color:${t.vars['--gold']};background:${t.vars['--bg4']};padding:3px 8px;border-radius:10px;border:1px solid ${t.vars['--border2']}">Seç</div>
       </div>
     </div>
   `).join('');
 }
 
-function applyCustomColor(){
+function previewCustomColor(){
   const accent=document.getElementById('custom-accent').value;
   const bg=document.getElementById('custom-bg').value;
   document.getElementById('custom-accent-val').textContent=accent;
   document.getElementById('custom-bg-val').textContent=bg;
+}
+
+function applyCustomColor(){
+  const accent=document.getElementById('custom-accent').value;
+  const bg=document.getElementById('custom-bg').value;
   const vars={
     '--bg':bg,
     '--bg2':lighten(bg,4),'--bg3':lighten(bg,8),'--bg4':lighten(bg,14),'--bg5':lighten(bg,22),
