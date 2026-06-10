@@ -48,7 +48,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
 .stat-pill{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;background:#1a1a1a;border:1px solid #333;border-radius:20px;font-size:11px;color:#aaa}
 .stat-pill b{font-weight:600;color:var(--gold)}
 .user-pill{font-size:11px;color:#888;background:#1a1a1a;border:1px solid #333;padding:4px 10px;border-radius:20px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.btn-add{padding:5px 12px;border-radius:var(--radius);border:none;background:var(--gold);color:#000;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
+.btn-add{padding:5px 12px;border-radius:var(--radius);border:none;background:#000;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:.02em}
+.btn-add:hover{background:#222}
 .btn-signout{padding:4px 10px;border-radius:var(--radius);border:1px solid #333;background:transparent;font-size:11px;cursor:pointer;color:#888;font-family:inherit}
 .btn-signout:hover{color:#fff;background:#1a1a1a}
 
@@ -163,6 +164,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
 .import-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:14px}
 .import-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px}
 .import-desc{font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.6}
+.import-btn{padding:7px 16px;border-radius:var(--radius);border:1.5px solid var(--text);background:transparent;color:var(--text);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px}
+.import-btn:hover{background:var(--text);color:var(--bg)}
 
 /* FOOTER */
 .footer{margin-top:40px;padding:16px 20px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:center;gap:12px;opacity:.35}
@@ -299,20 +302,20 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
     <div class="import-card">
       <div class="import-title">Hesap Bilgileri</div>
       <div class="import-desc" id="imp-status"></div>
-      <button class="btn-add" onclick="doExport()">⬇ CSV İndir</button>
+      <button class="import-btn" onclick="doExport()">⬇ CSV İndir</button>
     </div>
     <div class="import-card">
       <div class="import-title">📥 Excel Arşivini Aktar</div>
       <div class="import-desc">Önceki Excel'deki 1.756 kaydı hesabınıza aktarın. Mevcut kayıtlarınıza dokunulmaz.</div>
-      <button class="btn-add" id="excel-btn" onclick="doExcelImport()">⬆ Excel Arşivini Aktar (1.756 kayıt)</button>
-      <div style="font-size:12px;color:#52525b;margin-top:8px" id="import-prog"></div>
+      <button class="import-btn" id="excel-btn" onclick="doExcelImport()">⬆ Excel Arşivini Aktar (1.756 kayıt)</button>
+      <div style="font-size:12px;color:var(--text3);margin-top:8px" id="import-prog"></div>
     </div>
     <div class="import-card">
       <div class="import-title">➕ Toplu Film Ekle</div>
       <div class="import-desc">Her satıra bir film adı yaz, TMDB'den otomatik çekilir.</div>
-      <textarea id="bulk-text" placeholder="Inception&#10;The Godfather&#10;Breaking Bad,dizi" style="width:100%;height:80px;padding:8px;background:#18181b;border:1px solid #3f3f46;border-radius:6px;color:#fafafa;font-family:monospace;font-size:12px;resize:vertical;margin-bottom:8px"></textarea>
-      <button class="btn-add" onclick="doBulkImport()">⬆ Aktar</button>
-      <span id="bulk-st" style="font-size:12px;color:#52525b;margin-left:10px"></span>
+      <textarea id="bulk-text" placeholder="Inception&#10;The Godfather&#10;Breaking Bad,dizi" style="width:100%;height:80px;padding:8px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);color:var(--text);font-family:monospace;font-size:12px;resize:vertical;margin-bottom:8px"></textarea>
+      <button class="import-btn" onclick="doBulkImport()">⬆ Aktar</button>
+      <span id="bulk-st" style="font-size:12px;color:var(--text3);margin-left:10px"></span>
     </div>
   </div>
 
@@ -377,14 +380,58 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
 <div class="modal-ov" id="add-modal" style="display:none" onclick="if(event.target===this)document.getElementById('add-modal').style.display='none'">
   <div class="add-modal" onclick="event.stopPropagation()">
     <div class="add-head">
-      <div style="font-size:14px;font-weight:600;color:#111;margin-bottom:10px">🔍 Film veya Dizi Ekle</div>
-      <div class="type-tog">
-        <button class="type-btn active" id="st-film" onclick="setSType('movie')">🎬 Film</button>
-        <button class="type-btn" id="st-dizi" onclick="setSType('tv')">📺 Dizi</button>
+      <div style="font-size:14px;font-weight:600;color:#111;margin-bottom:10px">Film veya Dizi Ekle</div>
+      <!-- Sekme seçici -->
+      <div style="display:flex;gap:2px;background:#f4f4f5;border-radius:6px;padding:2px;margin-bottom:12px">
+        <button id="add-tab-tmdb" onclick="switchAddTab('tmdb')" style="flex:1;padding:5px;border-radius:4px;border:none;background:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:#111">🔍 TMDB'den Ara</button>
+        <button id="add-tab-manual" onclick="switchAddTab('manual')" style="flex:1;padding:5px;border-radius:4px;border:none;background:transparent;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;color:#888">✏️ Manuel Ekle</button>
       </div>
-      <input type="text" class="add-input" id="add-input" placeholder="Film veya dizi adını yaz..." oninput="onAddInput()" autocomplete="off">
-      <div id="add-results"></div>
-      <p style="font-size:10px;color:#a1a1aa;margin:6px 0 2px;text-align:center">TMDB (The Movie Database)</p>
+
+      <!-- TMDB arama -->
+      <div id="add-tmdb-section">
+        <div class="type-tog">
+          <button class="type-btn active" id="st-film" onclick="setSType('movie')">🎬 Film</button>
+          <button class="type-btn" id="st-dizi" onclick="setSType('tv')">📺 Dizi</button>
+        </div>
+        <input type="text" class="add-input" id="add-input" placeholder="Film veya dizi adını yaz..." oninput="onAddInput()" autocomplete="off">
+        <div id="add-results"></div>
+        <p style="font-size:10px;color:#a1a1aa;margin:6px 0 2px;text-align:center">TMDB (The Movie Database)</p>
+      </div>
+
+      <!-- Manuel ekleme -->
+      <div id="add-manual-section" style="display:none">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+          <div>
+            <div style="font-size:10px;font-weight:600;color:#52525b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Film / Dizi Adı *</div>
+            <input type="text" id="m-add-title" placeholder="Örn: Babam ve Oğlum" style="width:100%;padding:7px 9px;border-radius:6px;border:.5px solid #d4d4d8;color:#111;font-size:13px;font-family:inherit">
+          </div>
+          <div>
+            <div style="font-size:10px;font-weight:600;color:#52525b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Tür</div>
+            <select id="m-add-type" style="width:100%;padding:7px 9px;border-radius:6px;border:.5px solid #d4d4d8;color:#111;font-size:13px;font-family:inherit">
+              <option value="film">🎬 Film</option>
+              <option value="dizi">📺 Dizi</option>
+            </select>
+          </div>
+          <div>
+            <div style="font-size:10px;font-weight:600;color:#52525b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Yıl</div>
+            <input type="text" id="m-add-year" placeholder="Örn: 2005" maxlength="4" style="width:100%;padding:7px 9px;border-radius:6px;border:.5px solid #d4d4d8;color:#111;font-size:13px;font-family:inherit">
+          </div>
+          <div>
+            <div style="font-size:10px;font-weight:600;color:#52525b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Yönetmen</div>
+            <input type="text" id="m-add-director" placeholder="Örn: Çağan Irmak" style="width:100%;padding:7px 9px;border-radius:6px;border:.5px solid #d4d4d8;color:#111;font-size:13px;font-family:inherit">
+          </div>
+          <div style="grid-column:1/-1">
+            <div style="font-size:10px;font-weight:600;color:#52525b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Ülke</div>
+            <input type="text" id="m-add-country" placeholder="Örn: Türkiye" style="width:100%;padding:7px 9px;border-radius:6px;border:.5px solid #d4d4d8;color:#111;font-size:13px;font-family:inherit">
+          </div>
+          <div style="grid-column:1/-1">
+            <div style="font-size:10px;font-weight:600;color:#52525b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Not / Tür</div>
+            <input type="text" id="m-add-note" placeholder="Örn: Dram, aile filmi" style="width:100%;padding:7px 9px;border-radius:6px;border:.5px solid #d4d4d8;color:#111;font-size:13px;font-family:inherit">
+          </div>
+        </div>
+        <button onclick="addManual()" style="width:100%;padding:9px;border-radius:6px;border:none;background:#000;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">+ Arşive Ekle</button>
+        <div id="m-add-msg" style="font-size:12px;margin-top:8px;text-align:center"></div>
+      </div>
     </div>
     <div class="add-foot">
       <button class="mbtn-cancel" onclick="document.getElementById('add-modal').style.display='none'">Kapat</button>
@@ -562,8 +609,10 @@ function l2r(e){
 async function saveEntry(entry){
   const isTmp=!entry.id||entry.id.startsWith('tmp_');
   if(isTmp){
-    const{data,error}=await sb.from('movies').insert(l2r(entry)).select().single();
-    if(!error&&data){
+    const payload=l2r(entry);
+    const{data,error}=await sb.from('movies').insert(payload).select().single();
+    if(error){console.error('Insert error:',error.message,error.details);return false;}
+    if(data){
       const idx=db.findIndex(x=>x.id===entry.id);
       if(idx>=0) db[idx].id=data.id;
       return true;
@@ -571,6 +620,7 @@ async function saveEntry(entry){
     return false;
   } else {
     const{error}=await sb.from('movies').update(l2r(entry)).eq('id',entry.id);
+    if(error) console.error('Update error:',error.message);
     return !error;
   }
 }
@@ -748,7 +798,53 @@ async function fetchTmdbBg(entry){
 }
 
 // ADD
-function openAddModal(){document.getElementById('add-modal').style.display='';setTimeout(()=>document.getElementById('add-input').focus(),80);}
+function switchAddTab(tab){
+  const isTmdb=tab==='tmdb';
+  document.getElementById('add-tmdb-section').style.display=isTmdb?'':'none';
+  document.getElementById('add-manual-section').style.display=isTmdb?'none':'';
+  document.getElementById('add-tab-tmdb').style.background=isTmdb?'#fff':'transparent';
+  document.getElementById('add-tab-tmdb').style.color=isTmdb?'#111':'#888';
+  document.getElementById('add-tab-tmdb').style.fontWeight=isTmdb?'600':'500';
+  document.getElementById('add-tab-manual').style.background=isTmdb?'transparent':'#fff';
+  document.getElementById('add-tab-manual').style.color=isTmdb?'#888':'#111';
+  document.getElementById('add-tab-manual').style.fontWeight=isTmdb?'500':'600';
+}
+
+async function addManual(){
+  const title=document.getElementById('m-add-title').value.trim();
+  if(!title){document.getElementById('m-add-msg').innerHTML='<span style="color:#dc2626">Film adı zorunlu!</span>';return;}
+  const entry={
+    id:'tmp_'+Date.now(),
+    title,titleEN:'',
+    type:document.getElementById('m-add-type').value,
+    year:document.getElementById('m-add-year').value.trim(),
+    director:document.getElementById('m-add-director').value.trim(),
+    cast:'',poster:'',overview:'',tmdbId:'',tmdbRating:0,genres:[],
+    country:document.getElementById('m-add-country').value.trim(),
+    note:document.getElementById('m-add-note').value.trim(),
+    userRating:0,rewatchCount:1,
+    watchDate:new Date().toISOString().slice(0,10),
+    platform:'',status:'watched',tmdbFetched:false,fromExcel:false
+  };
+  document.getElementById('m-add-msg').innerHTML='<span style="color:#888">Ekleniyor...</span>';
+  const ok=await saveEntry(entry);
+  if(ok){
+    db.unshift(entry);buildFilters();updateTopbar();renderTable();
+    notify(title+' eklendi! ✓');
+    document.getElementById('add-modal').style.display='none';
+    // Formu temizle
+    ['m-add-title','m-add-year','m-add-director','m-add-country','m-add-note'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('m-add-msg').innerHTML='';
+  } else {
+    document.getElementById('m-add-msg').innerHTML='<span style="color:#dc2626">Kayıt hatası! Konsolu kontrol edin.</span>';
+  }
+}
+
+function openAddModal(){
+  document.getElementById('add-modal').style.display='';
+  switchAddTab('tmdb');
+  setTimeout(()=>document.getElementById('add-input').focus(),80);
+}
 function setSType(t){
   sType=t;
   document.getElementById('st-film').classList.toggle('active',t==='movie');
