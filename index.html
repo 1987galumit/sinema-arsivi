@@ -268,7 +268,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
       <select id="f-status" onchange="renderTable()"><option value="">Tüm durumlar</option><option value="watched">İzlendi</option><option value="watchlist">İzlenecek</option></select>
       <select id="f-year" onchange="renderTable()"><option value="">Tüm yıllar</option></select>
       <select id="f-decade" onchange="renderTable()"><option value="">Tüm dönemler</option></select>
-      <select id="f-rating" onchange="renderTable()"><option value="">Tüm puanlar</option><option value="5">★★★★★</option><option value="4">★★★★+</option><option value="3">★★★+</option><option value="rated">Puanlananlar</option></select>
+      <select id="f-rating" onchange="renderTable()"><option value="">Tüm puanlar</option><option value="9">★★★★★★★★★ (9)</option><option value="8">★★★★★★★★ (8+)</option><option value="7">★★★★★★★ (7+)</option><option value="5">★★★★★ (5+)</option><option value="3">★★★ (3+)</option><option value="rated">Puanlananlar</option></select>
       <select id="f-sort" onchange="renderTable()"><option value="added">Eklenme sırası</option><option value="year-desc">Yıl (yeni→eski)</option><option value="year-asc">Yıl (eski→yeni)</option><option value="title">Ada göre</option><option value="rating">Puana göre</option></select>
     </div>
     <div class="rinfo" id="rinfo"></div>
@@ -277,7 +277,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
         <th style="width:30px;text-align:right">#</th>
         <th class="tp"></th>
         <th>Film / Dizi</th><th>Yıl</th><th>Yönetmen</th><th>Not / Tür</th>
-        <th>TMDB</th><th>Puan</th><th>Tür</th><th>Durum</th>
+        <th>TMDB</th><th>Puan</th><th>İzl. Tarihi</th><th>Tür</th><th>Durum</th>
       </tr></thead>
       <tbody id="film-tbody"></tbody>
     </table>
@@ -699,7 +699,9 @@ function renderRows(items){
     const p=x.poster?`<img src="${TMDB_IMG}${x.poster}" alt="" loading="lazy" onerror="this.style.display='none';this.nextSibling.style.display='flex'">`:'';
     const ph=`<div class="tp-ph" style="display:${x.poster?'none':'flex'}">🎬</div>`;
     const tb=x.type==='dizi'?'<span class="badge bd">Dizi</span>':x.status==='watchlist'?'<span class="badge bw">İzl.</span>':'<span class="badge bf">Film</span>';
-    const stars=x.userRating?`<span class="stars-g">${'★'.repeat(x.userRating)}</span><span class="stars-e">${'☆'.repeat(5-x.userRating)}</span>`:'<span class="stars-e">☆☆☆☆☆</span>';
+        const stars=x.userRating
+      ?`<span class="stars-g">${'★'.repeat(x.userRating)}</span><span class="stars-e">${'☆'.repeat(9-x.userRating)}</span>`
+      :'<span class="stars-e" style="font-size:10px">—</span>';
     const tmdb=x.tmdbRating>0?`<span style="font-size:12px;${x.tmdbRating>=7?'color:#f59e0b;font-weight:500':'color:#52525b'}">★ ${parseFloat(x.tmdbRating).toFixed(1)}</span>`:'—';
     const sdot=x.status==='watched'?'#10b981':x.status==='watchlist'?'#6366f1':'#f59e0b';
     const stxt=x.status==='watched'?'İzlendi':x.status==='watchlist'?'İzlenecek':'İzleniyor';
@@ -712,6 +714,7 @@ function renderRows(items){
       <td class="tnote">${esc((x.genres||[]).join(', ')||x.note||'')}</td>
       <td>${tmdb}</td>
       <td>${stars}</td>
+      <td style="font-size:11px;color:var(--text3);white-space:nowrap">${x.watchDate||'—'}</td>
       <td>${tb}</td>
       <td><span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#52525b"><span style="width:5px;height:5px;border-radius:50%;background:${sdot};display:inline-block"></span>${stxt}</span></td>
     </tr>`;
@@ -745,7 +748,7 @@ async function openModal(id){
 }
 
 function closeModal(){document.getElementById('modal').style.display='none';}
-function renderStars(v){document.getElementById('m-stars').innerHTML=[1,2,3,4,5].map(i=>`<button class="sbtn${i<=v?' on':''}" onclick="setStar(${i})">${i<=v?'★':'☆'}</button>`).join('');}
+function renderStars(v){document.getElementById('m-stars').innerHTML=[1,2,3,4,5,6,7,8,9].map(i=>`<button class="sbtn${i<=v?' on':''}" onclick="setStar(${i})" title="${i}">${i<=v?'★':'☆'}</button>`).join('');}
 function setStar(v){starVal=v;renderStars(v);}
 function chRW(d){rwVal=Math.max(1,rwVal+d);document.getElementById('m-rw').textContent=rwVal;}
 
@@ -922,7 +925,7 @@ function buildRaporYears(){
 
 function renderRapor(){
   const yr=document.getElementById('r-year').value,tp=document.getElementById('r-type').value;
-  let items=db.filter(x=>x.status==='watched');
+  let items=db; // tüm kayıtlar, sadece watched değil
   if(yr) items=items.filter(x=>x.year===yr);
   if(tp) items=items.filter(x=>x.type===tp);
   const rated=items.filter(x=>x.userRating>0);
