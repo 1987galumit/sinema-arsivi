@@ -500,7 +500,13 @@ async function decompress(b64){
 }
 
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-function notify(msg){const n=document.getElementById('notif');document.getElementById('notif-text').textContent=msg;n.classList.add('show');setTimeout(()=>n.classList.remove('show'),2500);}
+function notify(msg){
+  const n=document.getElementById('notif');
+  if(!n) return;
+  document.getElementById('notif-text').textContent=msg;
+  n.classList.add('show');
+  setTimeout(()=>n.classList.remove('show'),2500);
+}
 
 // AUTH
 function switchTab(t){
@@ -1189,5 +1195,6 @@ loadSavedTheme();
 init();
 
 </script>
+<div id="notif" class="notif"><div class="notif-dot"></div><span id="notif-text"></span></div>
 </body>
 </html>
